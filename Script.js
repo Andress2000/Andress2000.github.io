@@ -13,7 +13,11 @@ window.onload = () => {
   snake = new Snake();
   food = new Food();
   window.setInterval(gameLoop, 100);
-  document.addEventListener('keydown', changeDirection);
+  document.addEventListener('keydown', (event) => changeDirection(event.keyCode));
+  document.getElementById('left').addEventListener('click', () => changeDirection(37));
+  document.getElementById('up').addEventListener('click', () => changeDirection(38));
+  document.getElementById('right').addEventListener('click', () => changeDirection(39));
+  document.getElementById('down').addEventListener('click', () => changeDirection(40));
 };
 
 function gameLoop() {
@@ -40,7 +44,6 @@ function gameLoop() {
 function Snake() {
   this.snakeArray = [{x: 5, y: 5}];
   this.direction = 'RIGHT';
-  this.nextDirection = 'RIGHT'; // Para evitar movimientos simultáneos
 
   this.draw = function() {
     this.snakeArray.forEach((segment, index) => {
@@ -50,7 +53,6 @@ function Snake() {
   };
 
   this.move = function() {
-    this.direction = this.nextDirection; // Aplicar la nueva dirección en el próximo ciclo
     const head = { ...this.snakeArray[0] };
 
     if (this.direction === 'LEFT') head.x -= 1;
@@ -59,43 +61,29 @@ function Snake() {
     if (this.direction === 'DOWN') head.y += 1;
 
     this.snakeArray.unshift(head);
-
-    // Solo eliminar la cola si no ha comido
-    if (!this.eat(food)) {
+    if (head.x !== food.x || head.y !== food.y) {
       this.snakeArray.pop();
     }
   };
 
   this.changeDirection = function(newDirection) {
-    if (
-      (this.direction === 'LEFT' && newDirection !== 'RIGHT') ||
-      (this.direction === 'RIGHT' && newDirection !== 'LEFT') ||
-      (this.direction === 'UP' && newDirection !== 'DOWN') ||
-      (this.direction === 'DOWN' && newDirection !== 'UP')
-    ) {
-      this.nextDirection = newDirection;
-    }
+    if (this.direction === 'LEFT' && newDirection !== 'RIGHT') this.direction = newDirection;
+    if (this.direction === 'RIGHT' && newDirection !== 'LEFT') this.direction = newDirection;
+    if (this.direction === 'UP' && newDirection !== 'DOWN') this.direction = newDirection;
+    if (this.direction === 'DOWN' && newDirection !== 'UP') this.direction = newDirection;
   };
 
   this.eat = function(food) {
     const head = this.snakeArray[0];
-    if (head.x === food.x && head.y === food.y) {
-      return true; // No eliminamos la cola en `move()`
-    }
-    return false;
+    return head.x === food.x && head.y === food.y;
   };
 
   this.checkCollision = function() {
     const head = this.snakeArray[0];
-
-    // Chocar con los bordes
     if (head.x < 0 || head.y < 0 || head.x >= columns || head.y >= rows) return true;
-
-    // Chocar con su propio cuerpo
     for (let i = 1; i < this.snakeArray.length; i++) {
       if (this.snakeArray[i].x === head.x && this.snakeArray[i].y === head.y) return true;
     }
-
     return false;
   };
 }
@@ -110,9 +98,9 @@ function Food() {
   };
 }
 
-function changeDirection(event) {
-  if (event.keyCode === 37) snake.changeDirection('LEFT');
-  if (event.keyCode === 38) snake.changeDirection('UP');
-  if (event.keyCode === 39) snake.changeDirection('RIGHT');
-  if (event.keyCode === 40) snake.changeDirection('DOWN');
+function changeDirection(keyCode) {
+  if (keyCode === 37) snake.changeDirection('LEFT');
+  if (keyCode === 38) snake.changeDirection('UP');
+  if (keyCode === 39) snake.changeDirection('RIGHT');
+  if (keyCode === 40) snake.changeDirection('DOWN');
 }
